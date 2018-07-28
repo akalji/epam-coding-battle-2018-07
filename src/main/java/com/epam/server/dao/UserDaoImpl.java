@@ -95,6 +95,39 @@ public class UserDaoImpl {
         return false;
     }
 
+
+    public User getByEmailAndPassword(String email, String password) {
+        Connection conn = connectionPool.getConnection();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        User user = new User();
+        try {
+            stmt = conn.prepareStatement(GET_USER_BY_EMAIL_AND_PASSWORD);
+            stmt.setString(1, email);
+            stmt.setString(2, password);
+            rs = stmt.executeQuery();
+            if (rs.next()
+                && rs.getString("user_email").equals(email)
+                && rs.getString("user_password").equals(password)){
+
+                user = new User();
+                user.setId(rs.getInt("user_id"));
+                user.setName(rs.getString("user_name"));
+//                String password = rs.getString("user_password");
+                user.setPassword(password);
+                user.setEmail(rs.getString("user_email"));
+                user.setRequests(rs.getInt("user_requests"));
+            }
+            return user;
+        } catch (SQLException e) {
+            log.log(Level.ERROR, e);
+        } finally {
+            closeResources(stmt, rs, conn);
+        }
+        return user;
+    }
+
+
     private void closeResources(PreparedStatement statement, ResultSet resultSet, Connection connection) {
         try {
             if (statement != null) statement.close();
