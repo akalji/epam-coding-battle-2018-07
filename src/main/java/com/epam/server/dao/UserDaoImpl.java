@@ -14,6 +14,8 @@ public class UserDaoImpl {
     private static final String ADD_USER = "INSERT INTO users (user_name, user_email, user_password, user_requests) VALUES(?, ?, ?, ?)";
     private static final String FIND_BY_ID = "SELECT  user_id, user_name, user_name, user_email, user_password, user_requests FROM users WHERE user_id=?";
     private static final String GET_USER_BY_EMAIL_AND_PASSWORD = "SELECT user_id, user_name, user_name, user_email, user_password, user_requests FROM users WHERE user_email=? and user_password=?";
+    private static final String UPDATE_USER = "UPDATE users SET user_name = ?, user_email = ?, user_password = ?, user_requests = ? WHERE user_id=?";
+
 
     public User getUserById(int id) {
         Connection conn = connectionPool.getConnection();
@@ -93,6 +95,39 @@ public class UserDaoImpl {
         return false;
     }
 
+
+    public User getByEmailAndPassword(String email, String password) {
+        Connection conn = connectionPool.getConnection();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        User user = new User();
+        try {
+            stmt = conn.prepareStatement(GET_USER_BY_EMAIL_AND_PASSWORD);
+            stmt.setString(1, email);
+            stmt.setString(2, password);
+            rs = stmt.executeQuery();
+            if (rs.next()
+                && rs.getString("user_email").equals(email)
+                && rs.getString("user_password").equals(password)){
+
+                user = new User();
+                user.setId(rs.getInt("user_id"));
+                user.setName(rs.getString("user_name"));
+//                String password = rs.getString("user_password");
+                user.setPassword(password);
+                user.setEmail(rs.getString("user_email"));
+                user.setRequests(rs.getInt("user_requests"));
+            }
+            return user;
+        } catch (SQLException e) {
+            log.log(Level.ERROR, e);
+        } finally {
+            closeResources(stmt, rs, conn);
+        }
+        return user;
+    }
+
+
     private void closeResources(PreparedStatement statement, ResultSet resultSet, Connection connection) {
         try {
             if (statement != null) statement.close();
@@ -102,6 +137,30 @@ public class UserDaoImpl {
             log.log(Level.ERROR, e1);
             e1.printStackTrace();
         }
+    }
+
+    public boolean updateUser(User user) {
+        Connection conn = connectionPool.getConnection();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.prepareStatement(UPDATE_USER);
+            stmt.setString(1, user.getName());
+            stmt.setString(2, user.getEmail());
+            stmt.setString(3, user.getPassword());
+            stmt.setInt(4, user.getRequests());
+            stmt.setInt(5, user.getId());
+
+            int result = stmt.executeUpdate();
+
+            return (result > 0);
+        } catch (SQLException e) {
+            log.log(Level.ERROR, e);
+        } finally {
+            closeResources(stmt, rs, conn);
+        }
+
+        return false;
     }
 
 }
