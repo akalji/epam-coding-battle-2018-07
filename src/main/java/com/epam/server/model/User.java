@@ -29,6 +29,13 @@ public class User {
         this.requests = requests;
     }
 
+  public User(int id,String name, String password, String email, int requests) {
+      this.id = id;
+    this.name = name;
+    this.password = password;
+    this.email = email;
+    this.requests = requests;
+  }
 
     public int getId() {
         return id;
