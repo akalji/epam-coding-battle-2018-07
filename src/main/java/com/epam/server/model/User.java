@@ -28,14 +28,12 @@ public class User {
 @Column(name="user_requests")
   private int requests;
 
-  private User user;
 
-  public User(String name, String password, String email, int requests, User user) {
+  public User(String name, String password, String email, int requests) {
     this.name = name;
     this.password = password;
     this.email = email;
     this.requests = requests;
-    this.user = user;
   }
 
 
